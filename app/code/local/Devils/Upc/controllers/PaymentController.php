@@ -7,7 +7,7 @@ class Devils_Upc_PaymentController extends Mage_Core_Controller_Front_Action
      *
      * @return Mage_Checkout_Model_Session
      */
-    public function getSession()
+    protected function _getSession()
     {
         return Mage::getSingleton('checkout/session');
     }
@@ -17,10 +17,10 @@ class Devils_Upc_PaymentController extends Mage_Core_Controller_Front_Action
      *
      * @return Mage_Sales_Model_Order
      */
-    public function getOrder()
+    protected function _getOrder()
     {
         if ($this->_order == null) {
-            $session = $this->getSession();
+            $session = $this->_getSession();
             $this->_order = Mage::getModel('sales/order');
             $this->_order->loadByIncrementId($session->getLastRealOrderId());
         }
@@ -34,7 +34,7 @@ class Devils_Upc_PaymentController extends Mage_Core_Controller_Front_Action
      */
     public function redirectAction()
     {
-        $session = $this->getSession();
+        $session = $this->_getSession();
 
         $quote_id = $session->getQuoteId();
         $last_real_order_id = $session->getLastRealOrderId();
@@ -45,12 +45,12 @@ class Devils_Upc_PaymentController extends Mage_Core_Controller_Front_Action
             $session->setUpcQuoteId($quote_id);
             $session->setUpcLastRealOrderId($last_real_order_id);
 
-            $order = $this->getOrder();
+            $order = $this->_getOrder();
             $order->loadByIncrementId($last_real_order_id);
 
             $html = $this->getLayout()->createBlock('devils_upc/redirect')->toHtml();
             $this->getResponse()->setHeader('Content-type', 'text/html; charset=utf-8')->setBody($html);
-
+/*
             $order->addStatusToHistory(
                 $order->getStatus(),
                 Mage::helper('devils_upc')->__('Customer switch over to UPC payment interface.')
@@ -60,6 +60,7 @@ class Devils_Upc_PaymentController extends Mage_Core_Controller_Front_Action
 
             $session->setQuoteId(null);
             $session->setLastRealOrderId(null);
+*/
         }
     }
 }

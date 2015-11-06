@@ -47,6 +47,8 @@
                 <model>devils_upc/paymentMethod</model>
                 <title>Visa / MasterCard</title>
                 <order_desc>Order # {{order_id}}</order_desc>
+                <currency_id>980</currency_id>
+                <locale>uk</locale>
                 <debug>0</debug>
                 <sandbox>0</sandbox>
                 <gateway_url>https://secure.upc.ua/go/enter</gateway_url>

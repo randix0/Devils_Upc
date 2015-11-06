@@ -22,6 +22,8 @@ class Devils_Upc_Model_PaymentMethod extends Mage_Payment_Model_Method_Abstract
     protected $_allowCurrencyCode = array('EUR','UAH','USD','RUB','RUR');
     protected $_order;
 
+    const CERTIFICATES_FOLDER = 'cert';
+
     protected function _useSandbox()
     {
         return $this->getConfigData('sandbox');
@@ -37,10 +39,50 @@ class Devils_Upc_Model_PaymentMethod extends Mage_Payment_Model_Method_Abstract
 
     public function getRedirectFormFields()
     {
-        return array(
-            'foo' => 'fooVal',
-            'bar' => 'barVal'
+        /** @var Mage_Checkout_Model_Session $session */
+        $session = Mage::getSingleton('checkout/session');
+
+        /** @var Mage_Sales_Model_Order $order */
+        $order = Mage::getModel('sales/order')->loadByIncrementId($session->getLastRealOrderId());
+
+        if (!$order->getId()) {
+            return array();
+        }
+
+        $MerchantId = $this->getConfigData('merchant_id');
+        $TerminalId = $this->getConfigData('terminal_id');
+        $PurchaseTime = date("ymdHis");
+        $OrderId = $order->getIncrementId();
+        $CurrencyId = $this->getConfigData('currency_id');
+        $TotalAmount = (int)($order->getBaseGrandTotal() * 100);
+        $data = "$MerchantId;$TerminalId;$PurchaseTime;$OrderId;$CurrencyId;$TotalAmount;;";
+
+        $certificatesFolder = Mage::getConfig()->getOptions()->getVarDir() . DS . SELF::CERTIFICATES_FOLDER . DS;
+        $privateKeyPath = $certificatesFolder . $this->getConfigData('store_pem');
+        $fp = fopen($privateKeyPath, "r");
+        $privateKey = fread($fp, 8192);
+        fclose($fp);
+        $privateKeyId = openssl_get_privatekey($privateKey);
+        openssl_sign($data, $signature, $privateKeyId);
+        openssl_free_key($privateKeyId);
+        $b64sign = base64_encode($signature);
+        unset($privateKey);
+        unset($privateKeyId);
+
+        $formData = array(
+            'Version' => '1',
+            'MerchantID' => $MerchantId,
+            'TerminalID' => $TerminalId,
+            'TotalAmount' => $TotalAmount,
+            'Currency' => $CurrencyId,
+            'locale' => $this->getConfigData('locale'),
+            'PurchaseTime' => $PurchaseTime,
+            'OrderID' => $OrderId,
+            'PurchaseDesc' => 'Заказ №' . $OrderId,
+            'Signature' => $b64sign,
         );
+
+        return $formData;
     }
 
     /**

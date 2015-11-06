@@ -29,8 +29,8 @@ class Devils_Upc_Block_Redirect extends Mage_Core_Block_Template
             ->setUseContainer(true)
             ->setMethod('POST');
 
-        foreach ($paymentMethod->getRedirectFormFields() as $field=>$value) {
-            $form->addField($field,'hidden',array('name'=>$field,'value'=>$value));
+        foreach ($paymentMethod->getRedirectFormFields() as $field => $value) {
+            $form->addField($field, 'hidden', array('name' => $field, 'value' => $value));
         }
         return $form;
     }
