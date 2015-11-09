@@ -1,7 +1,16 @@
 <html>
+<head>
+    <style>
+        body {width: 100%; height: 100%; display: table; color: #365788; line-height: 1.5;;
+            font-family: "Helvetica Neue", Helvetica, Verdana, sans-serif; font-size: 1.5em;}
+        div {width: 100%; display: table-cell; vertical-align: middle; text-align: center;}
+    </style>
+</head>
 <body>
-<?php echo $this->__('You will be redirected to the UPC website in a few seconds.'); ?>
-<?php echo $this->getForm()->toHtml(); ?>
-<script>document.getElementById("devils_upc_redirect").submit();</script>
+    <div>
+        <?php echo $this->__('You will be redirected to the UPC website in a few seconds.'); ?> <br/> ;)
+        <?php echo $this->getForm()->toHtml(); ?>
+    </div>
+    <script>document.getElementById("devils_upc_redirect").submit();</script>
 </body>
 </html>
