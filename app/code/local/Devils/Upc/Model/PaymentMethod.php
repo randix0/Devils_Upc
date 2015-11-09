@@ -168,7 +168,7 @@ class Devils_Upc_Model_PaymentMethod extends Mage_Payment_Model_Method_Abstract
 
     private function _validateSignature($signatureData, $b64sig)
     {
-        $certificatesFolder = Mage::getConfig()->getOptions()->getVarDir() . DS . SELF::CERTIFICATES_FOLDER . DS;
+        $certificatesFolder = Mage::getConfig()->getOptions()->getVarDir() . DS . self::CERTIFICATES_FOLDER . DS;
         $publicKeyPath = $certificatesFolder . $this->getConfigData('upc_cert');
         $fp = fopen($publicKeyPath, "r");
         $publicKey = fread($fp, 8192);
