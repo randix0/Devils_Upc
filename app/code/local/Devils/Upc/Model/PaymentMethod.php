@@ -130,11 +130,19 @@ class Devils_Upc_Model_PaymentMethod extends Mage_Payment_Model_Method_Abstract
             return array();
         }
 
+        $baseCurrency = $order->getBaseCurrencyCode();
+        $CurrencyId = $this->getConfigData('currency_id');
+        $helper = Mage::helper('devils_upc');
+        $upcCurrency = $helper->getCurrencyCodeById($CurrencyId);
+        if ($baseCurrency != $upcCurrency) {
+            return array();
+        }
+
         $MerchantId = $this->getConfigData('merchant_id');
         $TerminalId = $this->getConfigData('terminal_id');
         $PurchaseTime = date("ymdHis");
         $OrderId = $order->getIncrementId();
-        $CurrencyId = $this->getConfigData('currency_id');
+
         $TotalAmount = (int)($order->getBaseGrandTotal() * 100);
         $data = "$MerchantId;$TerminalId;$PurchaseTime;$OrderId;$CurrencyId;$TotalAmount;;";
 
@@ -182,6 +190,9 @@ class Devils_Upc_Model_PaymentMethod extends Mage_Payment_Model_Method_Abstract
 
     public function processCallback($data = array())
     {
+        if (empty($data)) {
+            return false;
+        }
         $paymentStatus = self::PAYMENT_STATUS_FAILURE;
 
         $MerchantId = $this->getConfigData('merchant_id');
@@ -281,7 +292,7 @@ class Devils_Upc_Model_PaymentMethod extends Mage_Payment_Model_Method_Abstract
 
                 break;
             default:
-                $error = $this->__($this->_transCodes[$TranCode]);
+                $error = Mage::helper('devils_upc')->__($this->_transCodes[$TranCode]);
                 $order->setState(
                     Mage_Sales_Model_Order::STATE_CANCELED, false,
                     $error,
@@ -298,5 +309,41 @@ class Devils_Upc_Model_PaymentMethod extends Mage_Payment_Model_Method_Abstract
 
 
         return $paymentStatus;
+    }
+
+    private function _getSecretKey()
+    {
+        return sha1($this->getConfigData('merchant_id'));
+    }
+
+    public function encodeOrderId($orderId)
+    {
+        $key = $this->_getSecretKey();
+        $b64encoded = base64_encode(
+            mcrypt_encrypt(
+                MCRYPT_RIJNDAEL_256,
+                md5($key),
+                $orderId,
+                MCRYPT_MODE_CBC,
+                md5(md5($key))
+            )
+        );
+        return preg_replace('/\%/','-', urlencode($b64encoded));
+    }
+
+    public function decodeOrderId($secret)
+    {
+        $encoded = (string)$secret;
+        $b64encoded = urldecode(preg_replace('/\-/', '%', $encoded));
+        $key = $this->_getSecretKey();
+        return (int)rtrim(
+            mcrypt_decrypt(
+                MCRYPT_RIJNDAEL_256,
+                md5($key),
+                base64_decode($b64encoded),
+                MCRYPT_MODE_CBC,
+                md5(md5($key))),
+            "\0"
+        );
     }
 }

@@ -2,6 +2,13 @@
 
 class Devils_Upc_Model_System_Config_Source_Currency
 {
+    private $_currencies = array(
+        978 => 'EUR',
+        643 => 'RUR',
+        840 => 'USD',
+        980 => 'UAH',
+    );
+
     /**
      * Options getter
      *
@@ -30,5 +37,14 @@ class Devils_Upc_Model_System_Config_Source_Currency
             840 => Mage::helper('devils_upc')->__('United States Dollar'),
             980 => Mage::helper('devils_upc')->__('Ukrainian Hryvnia'),
         );
+    }
+
+    public function getCurrencyCodeById($currencyId)
+    {
+        $code = '';
+        if (!empty($this->_currencies[(int)$currencyId])) {
+            $code = $this->_currencies[(int)$currencyId];
+        }
+        return $code;
     }
 }
