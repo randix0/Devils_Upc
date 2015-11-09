@@ -1,0 +1,7 @@
+<p>
+    <h2>Please use next commands to generate RSA keys:</h2>
+    <code>
+        openssl req -x509 -nodes -days 365 -newkey rsa:1024 -keyout store.pem -out store.crt <br/>
+        openssl rsa -in store.pem -pubout > store.pub
+    </code>
+</p>

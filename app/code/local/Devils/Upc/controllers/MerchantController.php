@@ -1,6 +1,6 @@
 <?php
 
-class Devils_Upc_PaymentController extends Mage_Core_Controller_Front_Action
+class Devils_Upc_MerchantController extends Mage_Core_Controller_Front_Action
 {
     /**
      * Session
@@ -43,15 +43,13 @@ class Devils_Upc_PaymentController extends Mage_Core_Controller_Front_Action
             $this->_redirect('checkout/cart/');
         } else {
             $session->setUpcQuoteId($quote_id);
-            $session->setUpcLastRealOrderId($last_real_order_id);
 
             $order = $this->_getOrder();
             $order->loadByIncrementId($last_real_order_id);
 
             $html = $this->getLayout()->createBlock('devils_upc/redirect')->toHtml();
             $this->getResponse()->setHeader('Content-type', 'text/html; charset=utf-8')->setBody($html);
-/*
-            $order->addStatusToHistory(
+            $order->addStatusHistoryComment(
                 $order->getStatus(),
                 Mage::helper('devils_upc')->__('Customer switch over to UPC payment interface.')
             )->save();
@@ -59,8 +57,43 @@ class Devils_Upc_PaymentController extends Mage_Core_Controller_Front_Action
             $session->getQuote()->setIsActive(false)->save();
 
             $session->setQuoteId(null);
-            $session->setLastRealOrderId(null);
-*/
         }
     }
+
+    /**
+     * When UPC returns customer
+     */
+    public function successAction()
+    {
+        $session = Mage::getSingleton('checkout/session');
+        $session->setQuoteId($session->getUpcQuoteId(true));
+        Mage::getSingleton('checkout/session')->getQuote()->setIsActive(false)->save();
+
+
+        $data = $this->getRequest()->getPost();
+        $paymentStatus = Mage::getModel('devils_upc/paymentMethod')->processCallback($data);
+        if ($paymentStatus == Devils_Upc_Model_PaymentMethod::PAYMENT_STATUS_SUCCESS) {
+            return $this->_redirect('checkout/onepage/success', array('_secure' => true));
+        } else {
+            return $this->_redirect('checkout/onepage/failure', array('_secure' => true));
+        }
+    }
+
+    /**
+     * When a customer cancel payment from Platon.
+     */
+    public function cancelAction()
+    {
+        $session = Mage::getSingleton('checkout/session');
+        $session->setQuoteId($session->getUpcQuoteId(true));
+        if ($session->getLastRealOrderId()) {
+            $order = Mage::getModel('sales/order')->loadByIncrementId($session->getLastRealOrderId());
+            if ($order->getId()) {
+                $order->cancel()->save();
+            }
+        }
+        $this->_redirect('checkout/cart');
+    }
+
+
 }

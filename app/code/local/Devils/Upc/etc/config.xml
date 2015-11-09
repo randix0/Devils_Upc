@@ -39,6 +39,16 @@
                 </args>
             </devils_upc>
         </routers>
+        <events>
+            <checkout_submit_all_after>
+                <observers>
+                    <upcevent_checkout_submit_all_after>
+                        <class>Devils_Upc_Model_Observer</class>
+                        <method>sendEmail</method>
+                    </upcevent_checkout_submit_all_after>
+                </observers>
+            </checkout_submit_all_after>
+        </events>
     </frontend>
     <default>
         <payment>
