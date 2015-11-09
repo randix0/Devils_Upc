@@ -138,7 +138,7 @@ class Devils_Upc_Model_PaymentMethod extends Mage_Payment_Model_Method_Abstract
         $TotalAmount = (int)($order->getBaseGrandTotal() * 100);
         $data = "$MerchantId;$TerminalId;$PurchaseTime;$OrderId;$CurrencyId;$TotalAmount;;";
 
-        $certificatesFolder = Mage::getConfig()->getOptions()->getVarDir() . DS . SELF::CERTIFICATES_FOLDER . DS;
+        $certificatesFolder = Mage::getConfig()->getOptions()->getVarDir() . DS . self::CERTIFICATES_FOLDER . DS;
         $privateKeyPath = $certificatesFolder . $this->getConfigData('store_pem');
         $fp = fopen($privateKeyPath, "r");
         $privateKey = fread($fp, 8192);

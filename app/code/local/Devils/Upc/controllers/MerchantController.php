@@ -2,6 +2,7 @@
 
 class Devils_Upc_MerchantController extends Mage_Core_Controller_Front_Action
 {
+    private $_order;
     /**
      * Session
      *
