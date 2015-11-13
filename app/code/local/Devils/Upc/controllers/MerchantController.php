@@ -73,6 +73,7 @@ class Devils_Upc_MerchantController extends Mage_Core_Controller_Front_Action
         Mage::getSingleton('checkout/session')->getQuote()->setIsActive(false)->save();
 
         $data = $this->getRequest()->getPost();
+        Mage::log('failureAction: ' . json_encode($data), null, 'upc.log', true);
         $paymentStatus = Mage::getModel('devils_upc/paymentMethod')->processCallback($data);
         if ($paymentStatus == Devils_Upc_Model_PaymentMethod::PAYMENT_STATUS_SUCCESS) {
             return $this->_redirect('checkout/onepage/success', array('_secure' => true));
@@ -87,6 +88,7 @@ class Devils_Upc_MerchantController extends Mage_Core_Controller_Front_Action
     public function failureAction()
     {
         $data = $this->getRequest()->getPost();
+        Mage::log('failureAction: ' . json_encode($data), null, 'upc.log', true);
         $paymentStatus = Mage::getModel('devils_upc/paymentMethod')->processCallback($data);
         if ($paymentStatus == Devils_Upc_Model_PaymentMethod::PAYMENT_STATUS_SUCCESS) {
             return $this->_redirect('checkout/onepage/success', array('_secure' => true));
@@ -104,9 +106,22 @@ class Devils_Upc_MerchantController extends Mage_Core_Controller_Front_Action
         if ($data) {
             $model = Mage::getModel('devils_upc/paymentMethod');
             $paymentStatus = $model->processCallback($data);
+
+            $outputKeys = array('MerchantID', 'TerminalID', 'OrderID', 'Currency', 'TotalAmount', 'XID',
+                'PurchaseTime', 'Response.action', 'Response.reason', 'Response.forwardUrl');
+            $data['Response.action'] = 'reverse';
+            $data['Response.reason'] = '';
+            $data['Response.forwardUrl'] = Mage::getBaseUrl('upc/merchant/failure');
+
             if ($paymentStatus) {
-                //$this->_redirect('*/*/*');
-                Mage::log('data: ' . json_encode($data), null, 'upc.log', true);
+                $data['Response.action'] = 'approve';
+                $data['Response.forwardUrl'] = Mage::getBaseUrl('upc/merchant/success');
+            }
+
+            foreach ($data as $key => $value) {
+                if (in_array($key, $outputKeys)) {
+                    echo $key . '="' . $value . '"' . "\n";
+                }
             }
         }
     }
