@@ -112,11 +112,11 @@ class Devils_Upc_MerchantController extends Mage_Core_Controller_Front_Action
                 'XID', 'PurchaseTime', 'Response.action', 'Response.reason', 'Response.forwardUrl');
             $data['Response.action'] = 'reverse';
             $data['Response.reason'] = '';
-            $data['Response.forwardUrl'] = Mage::getBaseUrl('upc/merchant/failure/');
+            $data['Response.forwardUrl'] = Mage::getUrl('upc/merchant/failure/');
 
             if ($paymentStatus == Devils_Upc_Model_PaymentMethod::PAYMENT_STATUS_SUCCESS) {
                 $data['Response.action'] = 'approve';
-                $data['Response.forwardUrl'] = Mage::getBaseUrl('upc/merchant/success/');
+                $data['Response.forwardUrl'] = Mage::getUrl('upc/merchant/success/');
             }
             Mage::log('notifyAction: ' . json_encode($data), null, 'upc.log', true);
 
