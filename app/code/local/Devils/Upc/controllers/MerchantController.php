@@ -107,8 +107,8 @@ class Devils_Upc_MerchantController extends Mage_Core_Controller_Front_Action
             $model = Mage::getModel('devils_upc/paymentMethod');
             $paymentStatus = $model->processCallback($data);
 
-            $outputKeys = array('MerchantID', 'TerminalID', 'OrderID', 'Currency', 'TotalAmount', 'XID',
-                'PurchaseTime', 'Response.action', 'Response.reason', 'Response.forwardUrl');
+            $outputKeys = array('MerchantID', 'TerminalID', 'OrderID', 'Currency', 'TotalAmount',
+                'XID', 'PurchaseTime', 'Response.action', 'Response.reason', 'Response.forwardUrl');
             $data['Response.action'] = 'reverse';
             $data['Response.reason'] = '';
             $data['Response.forwardUrl'] = Mage::getBaseUrl('upc/merchant/failure');
@@ -123,6 +123,7 @@ class Devils_Upc_MerchantController extends Mage_Core_Controller_Front_Action
                     echo $key . '="' . $value . '"' . "\n";
                 }
             }
+            Mage::log('notifyAction: ' . json_encode($data), null, 'upc.log', true);
         }
     }
 
