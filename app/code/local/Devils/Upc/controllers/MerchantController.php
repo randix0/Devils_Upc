@@ -102,9 +102,11 @@ class Devils_Upc_MerchantController extends Mage_Core_Controller_Front_Action
     {
         $data = $this->getRequest()->getPost();
         if ($data) {
-            $paymentStatus = Mage::getModel('devils_upc/paymentMethod')->processCallback($data);
+            $model = Mage::getModel('devils_upc/paymentMethod');
+            $paymentStatus = $model->processCallback($data);
             if ($paymentStatus) {
-                $this->_redirect('*/*/*');
+                //$this->_redirect('*/*/*');
+                Mage::log('data: ' . json_encode($data), null, 'upc.log', true);
             }
         }
     }
