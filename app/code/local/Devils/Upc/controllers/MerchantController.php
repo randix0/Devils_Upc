@@ -117,13 +117,13 @@ class Devils_Upc_MerchantController extends Mage_Core_Controller_Front_Action
                 $data['Response.action'] = 'approve';
                 $data['Response.forwardUrl'] = Mage::getBaseUrl('upc/merchant/success');
             }
+            Mage::log('notifyAction: ' . json_encode($data), null, 'upc.log', true);
 
             foreach ($data as $key => $value) {
                 if (in_array($key, $outputKeys)) {
                     echo $key . '="' . $value . '"' . "\n";
                 }
             }
-            Mage::log('notifyAction: ' . json_encode($data), null, 'upc.log', true);
         }
     }
 
