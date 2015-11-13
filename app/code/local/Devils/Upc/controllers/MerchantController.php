@@ -103,6 +103,7 @@ class Devils_Upc_MerchantController extends Mage_Core_Controller_Front_Action
     public function notifyAction()
     {
         $data = $this->getRequest()->getPost();
+        Mage::log('data: ' . json_encode($data), null, 'upc.log', true);
         if ($data) {
             $model = Mage::getModel('devils_upc/paymentMethod');
             $paymentStatus = $model->processCallback($data);
@@ -113,7 +114,7 @@ class Devils_Upc_MerchantController extends Mage_Core_Controller_Front_Action
             $data['Response.reason'] = '';
             $data['Response.forwardUrl'] = Mage::getBaseUrl('upc/merchant/failure/');
 
-            if ($paymentStatus) {
+            if ($paymentStatus == Devils_Upc_Model_PaymentMethod::PAYMENT_STATUS_SUCCESS) {
                 $data['Response.action'] = 'approve';
                 $data['Response.forwardUrl'] = Mage::getBaseUrl('upc/merchant/success/');
             }
