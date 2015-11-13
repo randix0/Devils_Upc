@@ -3,6 +3,7 @@
 class Devils_Upc_MerchantController extends Mage_Core_Controller_Front_Action
 {
     private $_order;
+
     /**
      * Session
      *
@@ -121,6 +122,11 @@ class Devils_Upc_MerchantController extends Mage_Core_Controller_Front_Action
         }
     }
 
+    /**
+     * Processing email links
+     *
+     * @return Mage_Core_Controller_Varien_Action
+     */
     public function linkAction()
     {
         $secretId  = $this->getRequest()->getParam('id');
