@@ -29,9 +29,7 @@ class Devils_Upc_MerchantController extends Mage_Core_Controller_Front_Action
     }
 
     /**
-     *
      * Redirect customer to UPC payment interface
-     *
      */
     public function redirectAction()
     {
@@ -64,31 +62,27 @@ class Devils_Upc_MerchantController extends Mage_Core_Controller_Front_Action
     }
 
     /**
-     * When UPC returns customer
+     * Processing success request
      */
     public function successAction()
     {
-        $session = $this->_getSession();
-        $session->setQuoteId($session->getUpcQuoteId(true));
-        Mage::getSingleton('checkout/session')->getQuote()->setIsActive(false)->save();
-
-        $data = $this->getRequest()->getPost();
-        Mage::log('failureAction: ' . json_encode($data), null, 'upc.log', true);
-        $paymentStatus = Mage::getModel('devils_upc/paymentMethod')->processCallback($data);
-        if ($paymentStatus == Devils_Upc_Model_PaymentMethod::PAYMENT_STATUS_SUCCESS) {
-            return $this->_redirect('checkout/onepage/success', array('_secure' => true));
-        } else {
-            return $this->_redirect('checkout/onepage/failure', array('_secure' => true));
-        }
+        return $this->notifyAction();
     }
 
     /**
-     * When payment fails
+     * Processing failure request
      */
     public function failureAction()
     {
+        return $this->notifyAction();
+    }
+
+    /**
+     * Processing payment response data
+     */
+    public function resultAction()
+    {
         $data = $this->getRequest()->getPost();
-        Mage::log('failureAction: ' . json_encode($data), null, 'upc.log', true);
         $paymentStatus = Mage::getModel('devils_upc/paymentMethod')->processCallback($data);
         if ($paymentStatus == Devils_Upc_Model_PaymentMethod::PAYMENT_STATUS_SUCCESS) {
             return $this->_redirect('checkout/onepage/success', array('_secure' => true));
@@ -98,12 +92,11 @@ class Devils_Upc_MerchantController extends Mage_Core_Controller_Front_Action
     }
 
     /**
-     * When a customer cancel payment from UPC.
+     * Processing payment response data
      */
     public function notifyAction()
     {
         $data = $this->getRequest()->getPost();
-        Mage::log('data: ' . json_encode($data), null, 'upc.log', true);
         if ($data) {
             $model = Mage::getModel('devils_upc/paymentMethod');
             $paymentStatus = $model->processCallback($data);
@@ -112,13 +105,13 @@ class Devils_Upc_MerchantController extends Mage_Core_Controller_Front_Action
                 'XID', 'PurchaseTime', 'Response.action', 'Response.reason', 'Response.forwardUrl');
             $data['Response.action'] = 'reverse';
             $data['Response.reason'] = '';
-            $data['Response.forwardUrl'] = Mage::getUrl('upc/merchant/failure/');
+            $data['Response.forwardUrl'] = Mage::getUrl('checkout/onepage/failure');
+            Mage::register('devils_upc/forwarded', '');
 
             if ($paymentStatus == Devils_Upc_Model_PaymentMethod::PAYMENT_STATUS_SUCCESS) {
                 $data['Response.action'] = 'approve';
-                $data['Response.forwardUrl'] = Mage::getUrl('upc/merchant/success/');
+                $data['Response.forwardUrl'] = Mage::getUrl('checkout/onepage/success');
             }
-            Mage::log('notifyAction: ' . json_encode($data), null, 'upc.log', true);
 
             foreach ($data as $key => $value) {
                 if (in_array($key, $outputKeys)) {
